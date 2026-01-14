@@ -125,6 +125,7 @@ function installShellIntegration() {
   try {
     writeFileSync(configPath, content, 'utf-8');
     console.log(`✓ Shell integration installed to ${configPath}`);
+    console.log(`  Run 'source ${configPath}' or restart your terminal to enable auto-apply`);
   } catch (error) {
     console.log('Note: Could not install shell integration automatically.');
   }

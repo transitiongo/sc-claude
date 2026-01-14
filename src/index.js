@@ -9,7 +9,7 @@ import {
   setCurrentProfile as setCurrentInConfig,
   hasProfiles
 } from './config.js';
-import { updateShellConfig, generateEnvOutput, removeShellConfig } from './shell.js';
+import { updateShellConfig, generateEnvOutput, removeShellConfig, getShellConfigPath } from './shell.js';
 import { updateWindowsEnv, generateWindowsEnvOutput } from './windows.js';
 import { selectProfile, inputProfile, editProfileInput, confirmAction } from './prompts.js';
 
@@ -27,10 +27,26 @@ function applyProfile(profile) {
 }
 
 /**
+ * Check if current shell env matches profile (wrapper function is active)
+ */
+function isEnvApplied(profile) {
+  if (!profile) return false;
+  return process.env.ANTHROPIC_BASE_URL === profile.ANTHROPIC_BASE_URL &&
+         process.env.ANTHROPIC_AUTH_TOKEN === profile.ANTHROPIC_AUTH_TOKEN;
+}
+
+/**
  * Print success message
  */
-function printSwitchSuccess(profileName) {
+function printSwitchSuccess(profileName, profile) {
   console.log(chalk.green(`\n✓ Switched to ${chalk.bold(profileName)}`));
+
+  // Check if env was applied (wrapper function is active)
+  // Give a small delay hint - the wrapper function runs AFTER this process exits
+  if (!isWindows && profile && !isEnvApplied(profile)) {
+    const configPath = getShellConfigPath();
+    console.log(chalk.dim(`  Run 'source ${configPath}' if env not auto-applied`));
+  }
   console.log();
 }
 
@@ -62,7 +78,7 @@ export async function switchProfile() {
     console.log(chalk.red(`Warning: Failed to update shell config: ${applyResult.error}`));
   }
 
-  printSwitchSuccess(selected);
+  printSwitchSuccess(selected, result.profile);
 }
 
 /**
@@ -82,7 +98,7 @@ export async function useProfile(name) {
     console.log(chalk.red(`Warning: Failed to update shell config: ${applyResult.error}`));
   }
 
-  printSwitchSuccess(name);
+  printSwitchSuccess(name, result.profile);
 }
 
 /**
@@ -106,7 +122,7 @@ export async function addProfile() {
     if (profile) {
       applyProfile(profile);
       console.log(chalk.yellow(`   Set as current profile.`));
-      printSwitchSuccess(input.name);
+      printSwitchSuccess(input.name, profile);
     }
   }
 }
