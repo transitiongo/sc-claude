@@ -1,6 +1,6 @@
 {
   "name": "sc-claude",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "CLI tool to switch Claude Code custom API configurations",
   "type": "module",
   "main": "src/index.js",
@@ -9,7 +9,6 @@
   },
   "scripts": {
     "test": "node bin/sc.js --help",
-    "publish": "npm publish --access public",
     "postinstall": "node scripts/postinstall.js"
   },
   "files": [

@@ -1,5 +1,15 @@
 import inquirer from 'inquirer';
+import chalk from 'chalk';
 import { getProfiles, getCurrentProfileName, getProfile } from './config.js';
+
+// Custom theme inspired by Claude Code CLI
+const customTheme = {
+  prefix: chalk.cyan('?'),
+  style: {
+    highlight: (text) => chalk.cyan(text),
+    answer: (text) => chalk.cyan.bold(text),
+  },
+};
 
 /**
  * Select a profile from the list
@@ -25,7 +35,9 @@ export async function selectProfile(message = 'Select a profile:') {
       name: 'selected',
       message,
       choices,
-      default: currentName
+      default: currentName,
+      theme: customTheme,
+      loop: false
     }
   ]);
 
@@ -42,6 +54,7 @@ export async function inputProfile(defaultName = '') {
       name: 'name',
       message: 'Profile name:',
       default: defaultName,
+      theme: customTheme,
       validate: (input) => {
         if (!input.trim()) {
           return 'Profile name is required';
@@ -56,6 +69,7 @@ export async function inputProfile(defaultName = '') {
       type: 'input',
       name: 'token',
       message: 'ANTHROPIC_AUTH_TOKEN:',
+      theme: customTheme,
       validate: (input) => {
         if (!input.trim()) {
           return 'Token is required';
@@ -67,6 +81,7 @@ export async function inputProfile(defaultName = '') {
       type: 'input',
       name: 'baseUrl',
       message: 'ANTHROPIC_BASE_URL:',
+      theme: customTheme,
       validate: (input) => {
         if (!input.trim()) {
           return 'Base URL is required';
@@ -104,6 +119,7 @@ export async function editProfileInput(profileName) {
       name: 'token',
       message: 'ANTHROPIC_AUTH_TOKEN:',
       default: profile.ANTHROPIC_AUTH_TOKEN,
+      theme: customTheme,
       validate: (input) => {
         if (!input.trim()) {
           return 'Token is required';
@@ -116,6 +132,7 @@ export async function editProfileInput(profileName) {
       name: 'baseUrl',
       message: 'ANTHROPIC_BASE_URL:',
       default: profile.ANTHROPIC_BASE_URL,
+      theme: customTheme,
       validate: (input) => {
         if (!input.trim()) {
           return 'Base URL is required';
@@ -146,7 +163,8 @@ export async function confirmAction(message) {
       type: 'confirm',
       name: 'confirmed',
       message,
-      default: false
+      default: false,
+      theme: customTheme
     }
   ]);
 

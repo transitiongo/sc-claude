@@ -9,7 +9,7 @@ import {
   setCurrentProfile as setCurrentInConfig,
   hasProfiles
 } from './config.js';
-import { updateShellConfig, generateEnvOutput } from './shell.js';
+import { updateShellConfig, generateEnvOutput, removeShellConfig } from './shell.js';
 import { updateWindowsEnv, generateWindowsEnvOutput } from './windows.js';
 import { selectProfile, inputProfile, editProfileInput, confirmAction } from './prompts.js';
 
@@ -152,11 +152,22 @@ export async function removeProfile() {
 
   console.log(chalk.green(`\n✓ Profile "${selected}" removed`));
 
-  // Update shell config with new current profile (if any)
-  const currentProfile = getCurrentProfile();
-  if (currentProfile) {
-    applyProfile(currentProfile);
-    console.log(chalk.yellow(`   Switched to "${getCurrentProfileName()}"`));
+  // Check if any profiles remain after deletion
+  if (hasProfiles()) {
+    // Update shell config with new current profile
+    const currentProfile = getCurrentProfile();
+    if (currentProfile) {
+      applyProfile(currentProfile);
+      console.log(chalk.yellow(`   Switched to "${getCurrentProfileName()}"`));
+    }
+  } else {
+    // No profiles left, remove shell config
+    if (isWindows) {
+      // TODO: implement removeWindowsEnv if needed
+    } else {
+      removeShellConfig();
+    }
+    console.log(chalk.yellow('   No profiles remaining. Shell config cleared.'));
   }
 }
 

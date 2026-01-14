@@ -193,6 +193,26 @@ export function hasProfiles() {
 }
 
 /**
+ * Extract profile name from URL (use last path segment)
+ */
+function extractNameFromUrl(baseUrl) {
+  try {
+    const url = new URL(baseUrl);
+    const pathParts = url.pathname.split('/').filter(p => p.length > 0);
+    if (pathParts.length > 0) {
+      const lastPart = pathParts[pathParts.length - 1];
+      // Ensure valid profile name (alphanumeric, hyphens, underscores)
+      if (/^[a-zA-Z0-9_-]+$/.test(lastPart)) {
+        return lastPart;
+      }
+    }
+  } catch {
+    // Ignore URL parse errors
+  }
+  return 'default';
+}
+
+/**
  * Initialize config from system environment variables (first-time setup)
  */
 export function initFromSystemEnv() {
@@ -208,14 +228,15 @@ export function initFromSystemEnv() {
 
   // Only initialize if both env vars are present
   if (token && baseUrl) {
-    config.profiles['default'] = {
-      name: 'default',
+    const name = extractNameFromUrl(baseUrl);
+    config.profiles[name] = {
+      name,
       ANTHROPIC_AUTH_TOKEN: token,
       ANTHROPIC_BASE_URL: baseUrl
     };
-    config.current = 'default';
+    config.current = name;
     saveConfig(config);
-    return { initialized: true, name: 'default' };
+    return { initialized: true, name };
   }
 
   return { initialized: false };

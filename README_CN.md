@@ -138,8 +138,10 @@ Switch Claude 将你的 API 配置存储在 `~/.claude/sc-profiles.json`，并�
 
 ### 配置文件位置
 
-- **配置存储：** `~/.claude/sc-profiles.json`
-- **环境变量：** `~/.zshrc` 或 `~/.bashrc`（托管代码块）
+| 文件 | 路径 | 说明 |
+|------|------|------|
+| 配置存储 | `~/.claude/sc-profiles.json` | 所有 API 配置 |
+| 环境变量 | `~/.zshrc` 或 `~/.bashrc` | 导出语句（托管代码块） |
 
 ## 🔧 Shell 补全
 

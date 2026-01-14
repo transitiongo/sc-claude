@@ -138,8 +138,10 @@ Switch Claude manages your API configurations in `~/.claude/sc-profiles.json` an
 
 ### Configuration Location
 
-- **Profiles:** `~/.claude/sc-profiles.json`
-- **Shell exports:** `~/.zshrc` or `~/.bashrc` (managed block)
+| File | Path | Description |
+|------|------|-------------|
+| Profiles | `~/.claude/sc-profiles.json` | All your API configurations |
+| Shell exports | `~/.zshrc` or `~/.bashrc` | Environment variables (managed block) |
 
 ## 🔧 Shell Completion
 
