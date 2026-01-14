@@ -27,20 +27,10 @@ function applyProfile(profile) {
 }
 
 /**
- * Print success message with eval hint
+ * Print success message
  */
 function printSwitchSuccess(profileName) {
   console.log(chalk.green(`\n✓ Switched to ${chalk.bold(profileName)}`));
-  console.log();
-
-  if (isWindows) {
-    console.log(chalk.yellow('💡 Changes will take effect in new terminal windows.'));
-    console.log(chalk.yellow('   To apply in current session (PowerShell):'));
-    console.log(chalk.cyan('   sc env | Invoke-Expression'));
-  } else {
-    console.log(chalk.yellow('💡 Run the following command to apply changes immediately:'));
-    console.log(chalk.cyan('   eval "$(sc env)"'));
-  }
   console.log();
 }
 

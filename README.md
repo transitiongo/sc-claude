@@ -53,7 +53,7 @@
 ## 📦 Installation
 
 ```bash
-npm install -g switch-claude-cli
+npm install -g sc-claude
 ```
 
 That's it! The CLI will:

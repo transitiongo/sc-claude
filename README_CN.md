@@ -53,7 +53,7 @@
 ## 📦 安装
 
 ```bash
-npm install -g switch-claude-cli
+npm install -g sc-claude
 ```
 
 安装完成后，CLI 会自动：

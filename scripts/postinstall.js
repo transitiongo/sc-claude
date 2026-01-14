@@ -9,11 +9,20 @@ import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 
-const START_MARKER = '# >>> sc completion >>>';
-const END_MARKER = '# <<< sc completion <<<';
+const START_MARKER = '# >>> sc managed >>>';
+const END_MARKER = '# <<< sc managed <<<';
 
-// Zsh completion script
-const ZSH_COMPLETION = `${START_MARKER}
+// Zsh: shell function wrapper + completion
+const ZSH_SCRIPT = `${START_MARKER}
+# sc wrapper function - auto-apply env after switch
+sc() {
+  command sc "$@"
+  local cmd="$1"
+  if [[ -z "$cmd" || "$cmd" == "use" || "$cmd" == "add" || "$cmd" == "edit" || "$cmd" == "remove" ]]; then
+    eval "$(command sc env)"
+  fi
+}
+# completion
 _sc() {
   local commands="use add remove edit list env"
   local cur=\${words[CURRENT]}
@@ -24,8 +33,17 @@ _sc() {
 compdef _sc sc
 ${END_MARKER}`;
 
-// Bash completion script
-const BASH_COMPLETION = `${START_MARKER}
+// Bash: shell function wrapper + completion
+const BASH_SCRIPT = `${START_MARKER}
+# sc wrapper function - auto-apply env after switch
+sc() {
+  command sc "$@"
+  local cmd="$1"
+  if [[ -z "$cmd" || "$cmd" == "use" || "$cmd" == "add" || "$cmd" == "edit" || "$cmd" == "remove" ]]; then
+    eval "$(command sc env)"
+  fi
+}
+# completion
 _sc() {
   local cur=\${COMP_WORDS[COMP_CWORD]}
   if [[ \${COMP_CWORD} -eq 1 ]]; then
@@ -63,9 +81,9 @@ function getShellConfigPath(shellType) {
 }
 
 /**
- * Install completion script to shell config
+ * Install shell wrapper function and completion
  */
-function installCompletion() {
+function installShellIntegration() {
   // Skip on Windows
   if (process.platform === 'win32') {
     return;
@@ -73,38 +91,42 @@ function installCompletion() {
 
   const shellType = detectShell();
   const configPath = getShellConfigPath(shellType);
-  const completionScript = shellType === 'zsh' ? ZSH_COMPLETION : BASH_COMPLETION;
+  const shellScript = shellType === 'zsh' ? ZSH_SCRIPT : BASH_SCRIPT;
 
   let content = '';
   if (existsSync(configPath)) {
     content = readFileSync(configPath, 'utf-8');
   }
 
-  // Check if already installed
-  if (content.includes(START_MARKER)) {
-    // Already installed, update it
-    const startIdx = content.indexOf(START_MARKER);
-    const endIdx = content.indexOf(END_MARKER);
+  // Check if already installed (look for old or new marker)
+  const oldMarker = '# >>> sc completion >>>';
+  const hasOldMarker = content.includes(oldMarker);
+  const hasNewMarker = content.includes(START_MARKER);
+
+  if (hasOldMarker || hasNewMarker) {
+    // Remove old version first
+    const markerToFind = hasOldMarker ? oldMarker : START_MARKER;
+    const endMarkerToFind = hasOldMarker ? '# <<< sc completion <<<' : END_MARKER;
+    const startIdx = content.indexOf(markerToFind);
+    const endIdx = content.indexOf(endMarkerToFind);
     if (startIdx !== -1 && endIdx !== -1) {
       content = content.substring(0, startIdx) +
-                completionScript +
-                content.substring(endIdx + END_MARKER.length);
+        shellScript +
+        content.substring(endIdx + endMarkerToFind.length);
     }
   } else {
-    // Append new completion
+    // Append new script
     if (content && !content.endsWith('\n')) {
       content += '\n';
     }
-    content += '\n' + completionScript + '\n';
+    content += '\n' + shellScript + '\n';
   }
 
   try {
     writeFileSync(configPath, content, 'utf-8');
-    console.log(`✓ Shell completion installed to ${configPath}`);
-    console.log('  Restart your terminal or run: source ' + configPath);
+    console.log(`✓ Shell integration installed to ${configPath}`);
   } catch (error) {
-    // Silently fail - don't break npm install
-    console.log('Note: Could not install shell completion automatically.');
+    console.log('Note: Could not install shell integration automatically.');
   }
 }
 
@@ -202,5 +224,5 @@ function importExistingConfig() {
 }
 
 // Run
-installCompletion();
+installShellIntegration();
 importExistingConfig();
