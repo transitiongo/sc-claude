@@ -1,11 +1,11 @@
 <p align="center">
-  <a href="./README_CN.md">🇨🇳 中文</a> | <a href="./README.md">🇺🇸 English</a>
+  <a href="https://github.com/transitiongo/sc-claude/blob/main/README_CN.md">🇨🇳 中文</a> | <a href="https://github.com/transitiongo/sc-claude/blob/main/README.md">🇺🇸 English</a>
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/npm/v/switch-claude-cli?style=flat-square&color=00d4aa" alt="npm version" />
+  <img src="https://img.shields.io/npm/v/sc-claude?style=flat-square&color=00d4aa" alt="npm version" />
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-blue?style=flat-square" alt="platform" />
-  <img src="https://img.shields.io/npm/l/switch-claude-cli?style=flat-square" alt="license" />
+  <img src="https://img.shields.io/npm/l/sc-claude?style=flat-square" alt="license" />
 </p>
 
 <h1 align="center">

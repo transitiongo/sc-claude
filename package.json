@@ -1,6 +1,6 @@
 {
   "name": "sc-claude",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "CLI tool to switch Claude Code custom API configurations",
   "type": "module",
   "main": "src/index.js",
