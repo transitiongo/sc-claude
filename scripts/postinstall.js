@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 /**
- * postinstall script - Auto-configure shell completion for sc command
+ * postinstall script - Auto-configure shell completion and import existing config
  * Only runs on macOS/Linux, skips Windows
  */
 
-import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'fs';
 import { homedir } from 'os';
 import { join } from 'path';
 
@@ -108,5 +108,99 @@ function installCompletion() {
   }
 }
 
+/**
+ * Extract profile name from URL (use last path segment)
+ */
+function extractNameFromUrl(baseUrl) {
+  try {
+    const url = new URL(baseUrl);
+    const pathParts = url.pathname.split('/').filter(p => p.length > 0);
+    if (pathParts.length > 0) {
+      const lastPart = pathParts[pathParts.length - 1];
+      if (/^[a-zA-Z0-9_-]+$/.test(lastPart)) {
+        return lastPart;
+      }
+    }
+  } catch {
+    // Ignore URL parse errors
+  }
+  return 'default';
+}
+
+/**
+ * Import existing ANTHROPIC_* config from shell config file
+ */
+function importExistingConfig() {
+  // Skip on Windows
+  if (process.platform === 'win32') {
+    return;
+  }
+
+  const CONFIG_DIR = join(homedir(), '.claude');
+  const CONFIG_FILE = join(CONFIG_DIR, 'sc-profiles.json');
+
+  // If config file already exists and has profiles, skip
+  if (existsSync(CONFIG_FILE)) {
+    try {
+      const config = JSON.parse(readFileSync(CONFIG_FILE, 'utf-8'));
+      if (config.profiles && Object.keys(config.profiles).length > 0) {
+        return;
+      }
+    } catch {
+      // Continue if can't parse
+    }
+  }
+
+  const shellType = detectShell();
+  const configPath = getShellConfigPath(shellType);
+
+  if (!existsSync(configPath)) {
+    return;
+  }
+
+  let content;
+  try {
+    content = readFileSync(configPath, 'utf-8');
+  } catch {
+    return;
+  }
+
+  // Parse ANTHROPIC_AUTH_TOKEN and ANTHROPIC_BASE_URL from exports
+  const tokenMatch = content.match(/export\s+ANTHROPIC_AUTH_TOKEN\s*=\s*["']?([^"'\n]+)["']?/);
+  const urlMatch = content.match(/export\s+ANTHROPIC_BASE_URL\s*=\s*["']?([^"'\n]+)["']?/);
+
+  const token = tokenMatch ? tokenMatch[1].trim() : null;
+  const baseUrl = urlMatch ? urlMatch[1].trim() : null;
+
+  // Only import if both values are present
+  if (token && baseUrl) {
+    const name = extractNameFromUrl(baseUrl);
+
+    // Ensure config directory exists
+    if (!existsSync(CONFIG_DIR)) {
+      mkdirSync(CONFIG_DIR, { recursive: true });
+    }
+
+    const config = {
+      current: name,
+      profiles: {
+        [name]: {
+          name,
+          ANTHROPIC_AUTH_TOKEN: token,
+          ANTHROPIC_BASE_URL: baseUrl
+        }
+      }
+    };
+
+    try {
+      writeFileSync(CONFIG_FILE, JSON.stringify(config, null, 2), 'utf-8');
+      console.log(`✓ Imported existing config as profile "${name}"`);
+    } catch {
+      // Silently fail
+    }
+  }
+}
+
 // Run
 installCompletion();
+importExistingConfig();

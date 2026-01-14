@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import chalk from 'chalk';
 import {
   switchProfile,
   useProfile,
@@ -11,15 +10,6 @@ import {
   listProfiles,
   outputEnv
 } from '../src/index.js';
-import { initFromSystemEnv } from '../src/config.js';
-
-// Initialize from system environment on first run
-const initResult = initFromSystemEnv();
-if (initResult.initialized) {
-  console.log(chalk.green(`✓ Detected system environment variables.`));
-  console.log(chalk.green(`  Created profile "${initResult.name}" as default.`));
-  console.log();
-}
 
 const program = new Command();
 

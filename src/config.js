@@ -213,9 +213,10 @@ function extractNameFromUrl(baseUrl) {
 }
 
 /**
- * Initialize config from system environment variables (first-time setup)
+ * Initialize config from shell config file (postinstall only)
+ * Reads existing ANTHROPIC_* exports from .zshrc/.bashrc
  */
-export function initFromSystemEnv() {
+export function initFromShellConfig(shellConfigPath) {
   const config = loadConfig();
 
   // If profiles already exist, skip initialization
@@ -223,10 +224,26 @@ export function initFromSystemEnv() {
     return { initialized: false };
   }
 
-  const token = process.env.ANTHROPIC_AUTH_TOKEN;
-  const baseUrl = process.env.ANTHROPIC_BASE_URL;
+  // Read shell config file
+  if (!existsSync(shellConfigPath)) {
+    return { initialized: false };
+  }
 
-  // Only initialize if both env vars are present
+  let content;
+  try {
+    content = readFileSync(shellConfigPath, 'utf-8');
+  } catch {
+    return { initialized: false };
+  }
+
+  // Parse ANTHROPIC_AUTH_TOKEN and ANTHROPIC_BASE_URL from exports
+  const tokenMatch = content.match(/export\s+ANTHROPIC_AUTH_TOKEN\s*=\s*["']?([^"'\n]+)["']?/);
+  const urlMatch = content.match(/export\s+ANTHROPIC_BASE_URL\s*=\s*["']?([^"'\n]+)["']?/);
+
+  const token = tokenMatch ? tokenMatch[1].trim() : null;
+  const baseUrl = urlMatch ? urlMatch[1].trim() : null;
+
+  // Only initialize if both values are present
   if (token && baseUrl) {
     const name = extractNameFromUrl(baseUrl);
     config.profiles[name] = {
